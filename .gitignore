@@ -1,0 +1,16 @@
+.venv/
+.venv-workers/
+.uv-cache/
+.tools/
+node_modules/
+__pycache__/
+*.pyc
+.wrangler/
+reports/
+.env
+.dev.vars
+*.pem
+*.key
+*firebase-adminsdk*.json
+src/vendor/
+python_modules/

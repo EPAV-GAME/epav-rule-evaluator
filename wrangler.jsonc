@@ -1,0 +1,10 @@
+{
+  "name": "epav-rule-evaluator",
+  "main": "src/main.py",
+  "compatibility_date": "2026-10-08",
+  "compatibility_flags": ["python_workers"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": {"enabled": true, "head_sampling_rate": 1},
+  "services": [{"binding": "PRODUCT_CATALOG", "service": "epav-product-evaluator"}]
+}
