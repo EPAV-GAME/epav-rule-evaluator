@@ -67,3 +67,8 @@ uv run pywrangler deploy --profile epav
 O workflow verifica testes e bundle a cada push. A publicação no Cloudflare é executada pela conta autorizada, sem colocar token do Wrangler no repositório. O Worker de catálogo deve estar publicado antes deste. [Documentação dos service bindings HTTP](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/http/).
 
 As duas rubricas medem adequação pedagógica, não probabilidade estatística, e suas notas não são diretamente comparáveis.
+# Roteiros e produtos fixos
+
+`POST /v2/recomendacoes` recebe `roteiro: "popup-v1"`, cliente, etapa, categoria e histórico. Valida os IDs do pacote oficial e enriquece os cinco SKUs exatos com fotos do catálogo compartilhado, pelo binding `PRODUCT_CATALOG`. Não retorna as notas e classificações antecipadamente.
+
+O motor pedagógico do jogo calcula a nota de 0 a 10 imediatamente após o clique. Os endpoints `/v1` continuam disponíveis para a versão anterior. Nenhuma rota desta API chama um modelo de IA.

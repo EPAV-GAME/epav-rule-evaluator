@@ -5,7 +5,7 @@ from fastapi import FastAPI,Request,Response,HTTPException,Security
 from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from models import EvaluationRequest,RecommendationRequest,RecommendationResponse
+from models import EvaluationRequest,RecommendationRequest,RecommendationResponse,PopupRequest
 from scoring import evaluate_rules,VERSION
 
 CATALOG_URL='https://epav-product-evaluator.kevinernandes2012.workers.dev'
@@ -31,7 +31,7 @@ app.add_middleware(CORSMiddleware,allow_origins=[ORIGIN],allow_methods=['GET','P
 bearer=HTTPBearer(auto_error=False)
 
 async def catalog_request(request,path,payload=None,credentials=None):
-    if path not in ['/v1/recomendacoes','/v1/contexto','/v1/ranking']:raise HTTPException(400,'INVALID_CATALOG_PATH')
+    if path not in ['/v1/recomendacoes','/v1/contexto','/v1/ranking','/v1/catalogo/itens']:raise HTTPException(400,'INVALID_CATALOG_PATH')
     if request.headers.get('origin') and request.headers['origin']!=ORIGIN:raise HTTPException(403,'ORIGIN_NOT_ALLOWED')
     headers={};method='GET' if payload is None else 'POST'
     if payload is not None:
@@ -64,6 +64,17 @@ async def catalog_request(request,path,payload=None,credentials=None):
 
 @app.exception_handler(TimeoutError)
 async def timeout_error(request,error):return JSONResponse({'detail':'CATALOG_TIMEOUT'},503)
+
+@app.post('/v2/recomendacoes')
+async def fixed_recommendations(choice:PopupRequest,request:Request,credentials:HTTPAuthorizationCredentials|None=Security(bearer)):
+    from popup import validate_popup,fixed_cards,PopupError
+    try:popup=validate_popup(choice)
+    except PopupError as error:raise HTTPException(422,str(error)) from None
+    catalog=await catalog_request(request,'/v1/catalogo/itens',
+        {'codigos':[str(o['codigo']) for o in popup['opcoes']]},credentials)
+    return dict(cliente_id=choice.cliente_id,no_atual=choice.no_atual,categoria=choice.categoria,
+        produtos=fixed_cards(popup,catalog),quantidade_solicitada=5,total_disponiveis=5,
+        ficha_escuta=[],orientacao='Cinco opções do roteiro. Compare uso, preparo e quantidade; a compra não é obrigatória.')
 
 @app.post('/v1/recomendacoes',response_model=RecommendationResponse)
 async def recommendations(choice:RecommendationRequest,request:Request,response:Response,credentials:HTTPAuthorizationCredentials|None=Security(bearer)):

@@ -35,6 +35,10 @@ class RecommendationRequest(StrictModel):
     historico: list[Decision] = Field(default_factory=list, max_length=40)
     categoria: Literal['entrada', 'principal', 'acompanhamento', 'bebida', 'sobremesa'] | None = None
 
+class PopupRequest(RecommendationRequest):
+    roteiro: Literal['popup-v1']
+    categoria: Literal['entrada', 'principal', 'acompanhamento', 'bebida', 'sobremesa'] = Field(...)
+
 class ProductCard(StrictModel):
     id: str
     codigo: str
